@@ -25,11 +25,9 @@ if(top>0):
 print
 print("  #    Address                                        Balance")
 print("-" * 64)
-pos = 0
-for address in sorted(unique_addresses, key=lambda x: -x[1])[:top if top>0 else len(unique_addresses)]:
+for i, address in enumerate(sorted(unique_addresses, key=lambda x: -x[1])[:top if top>0 else len(unique_addresses)]):
     total_balance += address[1]
-    pos += 1
-    print("%6d %-38s %18.8f " % (pos, address[0], address[1]))
+    print("%6d %-38s %18.8f " % (i + 1, address[0], address[1]))
 print("-" * 64)
 print("                                              %18.8f" % (total_balance))
      

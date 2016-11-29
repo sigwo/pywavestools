@@ -1,7 +1,7 @@
 import requests
 import math
 node = '127.0.0.1'
-nblocks = 1000
+nblocks = 10000
 total_balance = 0
 total_fees = 0
 generators = []
@@ -23,10 +23,8 @@ print
 print("                                                   Current     Current    Mined  Collected")
 print(" #  Generator                                      balance       share   blocks       fees")
 print("-" * 90)
-pos = 0
-for generator in sorted(unique_generators, key=lambda x: -x[1]):
-   pos += 1
-   print("%3d %-38s %18.8f  %6.2f%% %8d %10.3f" % (pos, generator[0], generator[1], generator[1] / total_balance * 100, generator[2], generator[3]))
+for i, generator in enumerate(sorted(unique_generators, key=lambda x: -x[1])):
+   print("%3d %-38s %18.8f  %6.2f%% %8d %10.3f" % (i + 1, generator[0], generator[1], generator[1] / total_balance * 100, generator[2], generator[3]))
 print("-" * 90)
 print("                                           %18.8f                   %10.3f" % (total_balance, total_fees))
      
