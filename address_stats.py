@@ -102,7 +102,7 @@ for asset in assets:
     assetid = asset['assetId']
     name = asset['issueTransaction']['name'][:20].encode('ascii', 'ignore')
     amount = '{:.{prec}f}'.format(asset_balance / 10. ** decimals, prec=decimals)
-    print ("%-45s %-20s %24s" % (assetid, name, amount))
+    print ("%-44s %-20s %24s" % (assetid, name, amount))
 print
 if args.blocks:
     print("Mined blocks:")
