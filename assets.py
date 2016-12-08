@@ -13,6 +13,7 @@ def blocks_reader(seq_from, seq_to, index):
 parser = argparse.ArgumentParser(description='Assets list for the Waves platform')
 parser.add_argument('-d', '--days', type=int, help='number of days to search')
 parser.add_argument('-a', '--assets', type=int, help='number of assets to show')
+parser.add_argument('-t', '--with-txs', action='store_true', help='shows only assets with transactions')
 parser.add_argument('-c', '--compact', action='store_true', help='compact view')
 
 args = parser.parse_args()
@@ -32,6 +33,7 @@ count = 0
 last = requests.get('http://' + node + ':6869/blocks/height').json()['height']
 prevdate = ''
 asset_txs={}
+block_with_first_asset = 236967
 if args.compact:
     print ("   #    Asset ID                                      Name                                   Amount")
     print ("-" * 99)
@@ -39,7 +41,7 @@ else:
     print ("   #        Issue date       Issuer                               Asset ID                                      Name                 Description                                          Quantity Decimals               Amount   Tx count")
     print ("-" * 235)
 try:
-    for n in range(int(math.ceil(last / (nthreads * 100)))):
+    for n in range(int(math.ceil((last - block_with_first_asset) / (nthreads * 100)) + 1)):
         thread_blocks = []
         thread=[]
         for t in range(nthreads):
@@ -62,8 +64,6 @@ try:
                 if tx['type']==3:
                     if count == max_assets:
                         raise
-                        
-                    count += 1
                     issue_time = time.strftime('%m/%d/%Y %H:%M:%S', time.gmtime(tx['timestamp']/1000.))
                     issuer = tx['sender']
                     assetid = tx['assetId']
@@ -76,10 +76,12 @@ try:
                         txcount = asset_txs[tx['assetId']]
                     else:
                         txcount = 0
-                    if args.compact:
-                        print ("%6d  %-45s %-20s %24s" % (count, assetid, name, amount))
-                    else:
-                        print ("%6d  %-19s  %-35s  %-45s %-20s %-40s %20d   %2d %24s %10d" % (count, issue_time, issuer, assetid, name, description, qt, dec, amount, txcount))   
+                    if not(args.with_txs) or (args.with_txs and txcount > 0):
+                        count += 1
+                        if args.compact:
+                            print ("%6d  %-45s %-20s %24s" % (count, assetid, name, amount))
+                        else:
+                            print ("%6d  %-19s  %-35s  %-45s %-20s %-40s %20d   %2d %24s %10d" % (count, issue_time, issuer, assetid, name, description, qt, dec, amount, txcount))   
                 elif tx['type']==4:
                     if tx['assetId'] in asset_txs:
                         asset_txs[tx['assetId']] += 1
