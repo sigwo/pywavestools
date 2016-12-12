@@ -1,11 +1,13 @@
 import requests
+import socket
 import re
 import time
 from ipwhois import IPWhois
 import argparse
 
 parser = argparse.ArgumentParser(description='List nodes of the Waves network')
-parser.add_argument('-a', '--all', action='store_true', help='includes removed or temporary offline nodes')
+parser.add_argument('-a', '--all', action='store_true', help='shows removed or temporary offline nodes')
+parser.add_argument('-v', '--version', action='store_true', help='shows node versions')
 
 args = parser.parse_args()
 
@@ -37,6 +39,20 @@ def getPeers(node):
     except:
         pass
     return peers
+
+def getVersion(ip):
+    version = '  -'
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        s.connect((ip, 6868))
+        data = s.recv(1024)
+        n = ord(data[ord(data[0]) + 13])
+        version = "%d.%d.%d" % (ord(data[ord(data[0]) + 4]), ord(data[ord(data[0]) + 8]), ord(data[ord(data[0]) + 12]))
+        s.close()
+    except:
+        pass
+    return version
 
 peers = getPeers('https://nodes.wavesnodes.com') + getPeers('http://127.0.0.1:6869')
 
@@ -83,7 +99,10 @@ for group in zip(*sorted(peers, key=lambda x: x[0], reverse=True))[1]:
                             lastseen = time.strftime('%m/%d/%Y %H:%M:%S', time.gmtime(peer['lastSeen']/1000.))
                         except:
                             pass
-                    nodes.append((name, ip, country[:2], net[:20], descr[:40], lastseen))
+                    version = ''
+                    if args.version:
+                        version = getVersion(ip)
+                    nodes.append((name, ip, country[:2], net[:20], descr[:40], version, lastseen))
                     if country in nodes_by_country.keys():
                         nodes_by_country[country] += 1
                     else:
@@ -96,19 +115,25 @@ print
 print
 line_length = 120
 if args.all:
-    line_length = 140
+    line_length = 142
+if args.version:
+    line_length += 8
 print("-" * line_length)
-print("  #  Node name                      IP address    Country  Network              Network description"),
+print("  #  Node name                      IP address    Country  Network              Network description                     "),
+if args.version:
+    print ("Version "),
 if args.all:
-    print("                     Status/Last seen")
+    print(" Status/Last seen")
 else:
     print
 print("-" * line_length)
 
 for i, node in enumerate(sorted(nodes, key=lambda x: x[2])):
-    print ("%3d  %-30s %-15s  %-2s    %-20s %-40s" % (i + 1, node[0], node[1], node[2], node[3], node[4])),
+    print ("%3d  %-30s %-15s  %-2s    %-20s %-40s " % (i + 1, node[0], node[1], node[2], node[3], node[4])),
+    if args.version:
+        print ("%-8s" % node[5]),
     if args.all:
-        print ("%-19s" % node[5])
+        print ("%-19s" % node[6])
     else:
         print
     
