@@ -20,7 +20,7 @@ def getPeers(node):
         if node not in checked_nodes:
             checked_nodes.append(node)
             try:
-                tmp_peers = [['connected'] + [requests.get(node + '/peers/connected', timeout=0.5).json()['peers']]]
+                tmp_peers = [['connected'] + [[x for x in requests.get(node + '/peers/connected', timeout=0.5).json()['peers'] if x['declaredAddress'].find(':6863')==-1 and x['address'].find(':6863')==-1]]]
                 print("Getting peers from %s" % node)
             except:
                 pass
