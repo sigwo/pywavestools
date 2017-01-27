@@ -222,21 +222,20 @@ def hashChain(noncedSecret):
 
 
 for i in range(n_addresses):
-    p = generatePhrase()
-    p='\x00\x00\x00\x00' + p
+    seed = generatePhrase()
 
-    seedHash = hashChain(p)
+    seedHash = hashChain('\0\0\0\0' + seed)
     accountSeedHash = hashlib.sha256(seedHash).digest()
 
     private_key = curve.generatePrivateKey(accountSeedHash)
-    public_key = message = curve.generatePublicKey(private_key)
+    public_key = curve.generatePublicKey(private_key)
 
     unhashedAddress = chr(1) + chainId + hashChain(public_key)[0:20]
     addressHash = hashChain(unhashedAddress)[0:4]
     address = base58.b58encode(unhashedAddress + addressHash)
 
     print("address #    : %d" % (i+1))
-    print("seed         : %s" % p)
+    print("seed         : %s" % seed)
     print("public key   : %s" % base58.b58encode(public_key))
     print("private key  : %s" % base58.b58encode(private_key))
     print("address      : %s" % address)
