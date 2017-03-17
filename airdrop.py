@@ -2,7 +2,9 @@ import pywaves as pw
 import argparse
 import os.path
 
+# Flip the comment below for testnet, leave for airdropping on mainnet
 # pw.setNode("http://127.0.0.1:6869","testnet")
+pw.setNode("http://127.0.0.1:6869", "mainnet")
 
 parser = argparse.ArgumentParser(description='Waves Airdrop Tool')
 parser.add_argument('pkey', type=str, help='private key of the sending address')
